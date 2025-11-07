@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { useUser } from "@/contexts/UserContext";
+import { Link, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   StyleSheet,
@@ -7,15 +9,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-// import { account } from "../lib/appwrite"; // import Appwrite client
-import { Link } from "expo-router";
-import { account } from "./lib/appwrite";
 
 const Register = () => {
+  const { register, current } = useUser();
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    if (current) router.replace("/");
+  }, [current, router]);
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
@@ -28,10 +33,11 @@ const Register = () => {
     }
 
     try {
-      const user = await account.create(email, password, name);
-      Alert.alert("Success", `Account created for ${name}.`);
+      await register(email, password, name);
+      // register auto logs in via context, redirect to home
+      router.replace("/");
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to register.");
+      Alert.alert("Error", error?.message || "Failed to register.");
     }
   };
 
