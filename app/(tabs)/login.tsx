@@ -1,4 +1,3 @@
-import { Link } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -8,17 +7,28 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+// import { account } from "../lib/appwrite";
+import { Link, useRouter } from "expo-router";
+import { account } from "../lib/appwrite";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
-    Alert.alert("Success", `Logged in as ${email}`);
+
+    try {
+      const session = await account.createSession(email, password);
+      Alert.alert("Success", `Logged in as ${email}`);
+      router.push("/index"); // navigate to home after login
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to login.");
+    }
   };
 
   return (
@@ -28,16 +38,12 @@ const Login = () => {
       <TextInput
         style={styles.input}
         placeholder="Email"
-        placeholderTextColor="#999"
-        keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Password"
-        placeholderTextColor="#999"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -62,17 +68,11 @@ export default Login;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
     padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "600",
-    marginBottom: 40,
-    color: "#333",
-  },
+  title: { fontSize: 28, fontWeight: "600", marginBottom: 40 },
   input: {
     width: "100%",
     borderWidth: 1,
@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     marginBottom: 20,
-    fontSize: 16,
   },
   button: {
     width: "100%",
@@ -88,20 +87,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
-    marginTop: 10,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  footerText: {
-    marginTop: 20,
-    fontSize: 14,
-    color: "#555",
-  },
-  link: {
-    color: "coral",
-    fontWeight: "bold",
-  },
+  buttonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  footerText: { marginTop: 20, fontSize: 14, color: "#555" },
+  link: { color: "coral", fontWeight: "bold" },
 });
